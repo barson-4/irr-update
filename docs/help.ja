@@ -1,0 +1,69 @@
+irr_update - IRRオブジェクトメール自動化ツール
+
+使用方法:
+  irr_update.sh --registry <registry> --object <object> [オプション]
+
+オプション:
+
+  --registry <registry>
+      対象のIRRレジストリを指定します。
+
+      値は以下のディレクトリ名と一致させる必要があります:
+          settings/registries/
+
+      例:
+          radb
+          jpirr
+
+      上記ディレクトリに定義された任意のレジストリを指定可能です。
+      レジストリ名は大文字・小文字を区別しませんが、小文字の使用を推奨します。
+
+  --object <object>
+      対象オブジェクト種別
+
+      対応:
+          mntner
+          aut-num
+          as-set
+          route
+          route6
+
+  --mode <mode>
+      実行モード
+
+      check:
+          mail body のみ生成（送信なし）
+
+      dry-run:
+          sender宛にテスト送信
+          SMTP認証も実施
+
+      production:
+          実際のレジストリへ送信
+          確認入力が必要
+
+  --name <name>
+      オブジェクト主キー指定（aut-num / as-set / mntner）
+
+      例:
+          AS64496
+          AS64496:AS-CONE
+          MAINT-AS64496
+
+  --mail-sender <email>
+      送信元メールアドレス
+
+  --objects <list>
+      （cron_runner.sh 用）
+      カンマ区切りで対象オブジェクト指定
+
+      例:
+          mntner,aut-num,as-set,route,route6
+
+補足:
+  - objects/*.ini を正とする
+  - 未指定項目は common.conf から補完される
+  - ログは以下に保存される:
+        logs/scripts/
+        logs/registry/<registry>/<object>/
+  - dry-run は実際にSMTP通信を行う

@@ -1,0 +1,20 @@
+#
+# IRR Update Cron Sample
+#
+# NOTE:
+# - Replace "you@example.com" with your actual mail address
+# - Registry names should be specified in lowercase
+# - Logs are stored under /opt/irrv2/logs/scripts/
+#
+
+############################################################
+# cron_runner (recommended)
+############################################################
+
+# Sample: full IRR update (RADB)
+# Run daily at 02:30
+30 2 * * * bash /opt/irrv2/scripts/cron_runner.sh --registry radb --mode production --mail-sender you@example.com --objects mntner,aut-num,as-set,route,route6 >> /opt/irrv2/logs/scripts/cron_runner.log 2>&1
+
+# Sample: full IRR update (JPIRR)
+# Run daily at 02:40
+40 2 * * * bash /opt/irrv2/scripts/cron_runner.sh --registry jpirr --mode production --mail-sender you@example.com --objects mntner,aut-num,as-set,route,route6 >> /opt/irrv2/logs/scripts/cron_runner.log 2>&1

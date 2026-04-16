@@ -1,0 +1,68 @@
+irr_update - IRR object mail automation tool
+
+Usage:
+  irr_update.sh --registry <registry> --object <object> [options]
+
+Options:
+  --registry <registry>
+      Specify target IRR registry.
+
+      The value must match a directory name under:
+          settings/registries/
+
+      Examples:
+          radb
+          jpirr
+
+      Any registry defined in the above directory can be used.
+      Registry names are case-insensitive, but lowercase is recommended.
+
+  --object <object>
+      Target object type.
+
+      Supported:
+          mntner
+          aut-num
+          as-set
+          route
+          route6
+
+  --mode <mode>
+      Execution mode.
+
+      check:
+          Generate mail body only (no SMTP send)
+
+      dry-run:
+          Send test mail to sender address
+          SMTP authentication is performed
+
+      production:
+          Send mail to actual registry
+          Requires confirmation
+
+  --name <name>
+      Specify object primary key (for aut-num / as-set / mntner)
+
+      Examples:
+          AS64496
+          AS64496:AS-CONE
+          MAINT-AS64496
+
+  --mail-sender <email>
+      Sender email address
+
+  --objects <list>
+      (cron_runner.sh only)
+      Comma-separated object list
+
+      Example:
+          mntner,aut-num,as-set,route,route6
+
+Notes:
+  - objects/*.ini is the single source of truth
+  - Missing values are complemented from common.conf
+  - Logs are stored under:
+        logs/scripts/
+        logs/registry/<registry>/<object>/
+  - dry-run mode sends actual SMTP session to sender
