@@ -31,8 +31,8 @@ check:
   mail body のみ生成
 
 dry-run:
-  sender宛にテスト送信
-  SMTP認証も実行
+  --smtp-user 宛にテスト送信
+  --no-smtp 時は --mail-sender 宛に送信
 
 production:
   実レジストリへ送信
@@ -45,6 +45,7 @@ production:
 --mode <mode>
 --name <name>
 --mail-sender <email>
+--smtp-user <user>
 
 --objects <list>
   （cron_runner.sh 用）
@@ -71,3 +72,4 @@ route / route6:
 ## 補足
 - 未指定項目は common.conf から補完
 - dry-run でも実際にSMTP通信を行う
+- --mail-smtp-user は廃止。--smtp-user に統一

@@ -53,6 +53,15 @@ irr_update - IRRオブジェクトメール自動化ツール
   --mail-sender <email>
       送信元メールアドレス
 
+  --smtp-user <user>
+      SMTP認証ユーザ（任意）
+      dry-run時はこのアドレスへ送信
+      --no-smtp または未指定時は --mail-sender へ送信
+
+  --no-smtp
+      SMTP AUTH を行わない
+      dry-run時の送信先は --mail-sender になる
+
   --objects <list>
       （cron_runner.sh 用）
       カンマ区切りで対象オブジェクト指定

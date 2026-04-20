@@ -136,8 +136,20 @@ MAIL_SENDER_ADDR=""        # --mail-sender <address> (production From override)
 SENDER_TO_ADDR=""          # --sender <address> (dry-run To override)
 LOG_DIR=""                 # --log-dir (default decided at runtime)
 pick_log_dir() {
+        # Prefer: /opt/irr/logs if writable, else $HOME/.irr/logs, else /tmp/irr-logs
         local d
         d="${basedir}/logs/scripts"
+        if mkdir -p "$d" 2>/dev/null && [ -w "$d" ]; then
+                echo "$d"; return 0
+        fi
+        if [ -n "${HOME:-}" ]; then
+                d="${HOME}/.irr/logs"
+                if mkdir -p "$d" 2>/dev/null && [ -w "$d" ]; then
+                        echo "$d"; return 0
+                fi
+        fi
+        d="/tmp/irr-logs"
+        mkdir -p "$d" 2>/dev/null || true
         echo "$d"
 }
 init_run_dir() {
@@ -417,9 +429,7 @@ remove_ini_section() {
 				skip=0
 				;;
 		esac
-		if [ "${skip}" -eq 0 ]; then
-			printf '%s\n' "${line}" >> "${out}" || return 1
-		fi
+		[ "${skip}" -eq 0 ] && printf '%s\n' "${line}" >> "${out}" || return 1
 	done < "${ini}"
 }
 
@@ -1519,7 +1529,6 @@ set_mail_smtp_user() {
 	ARG_USER="$1"
 	if [ -n "${ARG_USER}" ]; then
 		FLAG_USER="true"
-		SMTP_AUTH_USER="${ARG_USER}"
 		smtp_user_address="${ARG_USER}"
 	fi
 }
@@ -1936,7 +1945,7 @@ annual_update_consistency_check() {
 #   --mode <check|dry-run|production>
 #   --add <prefix> / --delete <prefix> / --customer "<descr>" / --update
 #   --name <primary-key>   (manual update for aut-num/as-set)
-#   --mail-sender <addr> / --smtp-user <addr> / --no-smtp
+#   --mail-sender <addr> / --mail-smtp-user <addr>
 #   --smtp-no-check
 #   --yes
 #
@@ -2025,17 +2034,9 @@ parse_args_long_only() {
 				echo "ERROR: unknown option: --send-mail (use --mail-sender)" >&2
 				exit 2
 				;;
-			--smtp-user)
+			--mail-smtp-user)
 				shift
 				set_mail_smtp_user "${1:-}"
-				shift
-				;;
-			--mail-smtp-user)
-				echo "ERROR: unknown option: --mail-smtp-user (use --smtp-user)" >&2
-				exit 2
-				;;
-			--no-smtp)
-				SMTP_AUTH="false"
 				shift
 				;;
 			--smtp-no-check)
@@ -2250,10 +2251,9 @@ ask_yesno() {
 
 decide_execution_mode_and_recipient() {
     # Sets: execution_mode, from_mail_address, to_mail_address, cc_mail_address
-    # Behavior:
+    # New behavior (no legacy compatibility):
     #   --mode check      : no send (to/cc empty)
-    #   --mode dry-run    : send to --smtp-user, unless --no-smtp or smtp-user is unset,
-    #                        then send to --mail-sender. no Cc.
+    #   --mode dry-run    : send to From only, no Cc
     #   --mode production : send to registry (To/cc from registry config)
     #
     # From is always --mail-sender (already validated upstream)
@@ -2269,11 +2269,7 @@ decide_execution_mode_and_recipient() {
             ;;
         dry-run)
             execution_mode="Dry-run"
-            if [ "${SMTP_AUTH:-true}" = "false" ] || [ -z "${ARG_USER:-${SMTP_AUTH_USER:-${smtp_user_address:-}}}" ]; then
-                to_mail_address="${from_mail_address}"
-            else
-                to_mail_address="${ARG_USER:-${SMTP_AUTH_USER:-${smtp_user_address:-}}}"
-            fi
+            to_mail_address="${from_mail_address}"
             cc_mail_address=""
             ;;
         production)
@@ -2385,7 +2381,7 @@ fi
 
 # Execution mode normalization (new)
 #   --mode check      : generate artifacts only, do not send (default)
-#   --mode dry-run    : send to --smtp-user, unless --no-smtp or smtp-user is unset, then send to From
+#   --mode dry-run    : send only to From address, never to registry
 #   --mode production : send to registry (explicit)
 
 #------------------------------------------------------------------------------
@@ -2393,13 +2389,9 @@ fi
 #------------------------------------------------------------------------------
 
 if [ "${execution_mode}" = "Dry-run" ]; then
-	echo "[DRY-RUN] Mail will be sent to the SMTP user address for final SMTP/auth check."
-	# In dry-run, send to SMTP user unless --no-smtp or smtp-user is unset; otherwise send to sender.
-	if [ "${SMTP_AUTH:-true}" = "false" ] || [ -z "${ARG_USER:-${SMTP_AUTH_USER:-${smtp_user_address:-}}}" ]; then
-		to_mail_address="${from_mail_address}"
-	else
-		to_mail_address="${ARG_USER:-${SMTP_AUTH_USER:-${smtp_user_address:-}}}"
-	fi
+	echo "[DRY-RUN] Mail will be sent to the sender address for final SMTP/auth check."
+	# In dry-run, always send to sender and do not CC
+	to_mail_address="${from_mail_address}"
 	cc_mail_address=""
 	MAIL_BODY_TMP="${TEMP_DIR:-${RUN_DIR}/temp}/mail_body.raw.txt"
 	MAIL_RAW_OUT="${TEMP_DIR:-${RUN_DIR}/temp}/mail.raw.txt"

@@ -52,6 +52,15 @@ Options:
   --mail-sender <email>
       Sender email address
 
+  --smtp-user <user>
+      SMTP authentication user (optional)
+      In dry-run mode, mail is sent to this address
+      If omitted or --no-smtp is used, dry-run sends to --mail-sender
+
+  --no-smtp
+      Disable SMTP AUTH
+      In dry-run mode, mail is sent to --mail-sender
+
   --objects <list>
       (cron_runner.sh only)
       Comma-separated object list

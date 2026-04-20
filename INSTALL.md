@@ -45,11 +45,12 @@ vim /opt/irrv2/settings/registries/*/common.conf
 Run dry-run:
 
 /opt/irrv2/scripts/irr_update.sh \
-  --registries radb \
+  --registry radb \
   --object route \
   --update \
   --mode dry-run \
-  --mail-sender you@example.com
+  --mail-sender you@example.com \
+  --smtp-user auth-user@example.com
 
 ## Cron Setup (Recommended)
 
@@ -59,10 +60,11 @@ crontab -e
 
 Example:
 
-30 2 * * * bash /opt/irrv2/scripts/cron_runner.sh --registries radb --mode production --mail-sender you@example.com --objects mntner,aut-num,as-set,route,route6 >> /opt/irrv2/logs/scripts/cron_runner.log 2>&1
+30 2 * * * bash /opt/irrv2/scripts/cron_runner.sh --registry radb --mode production --mail-sender you@example.com --smtp-user auth-user@example.com --objects mntner,aut-num,as-set,route,route6 >> /opt/irrv2/logs/scripts/cron_runner.log 2>&1
 
 ## Notes
 
 - objects/*.ini is the source of truth
-- dry-run performs real SMTP send to sender
+- dry-run sends to --smtp-user by default
+- with --no-smtp, dry-run sends to --mail-sender
 - All configuration must be completed before production use

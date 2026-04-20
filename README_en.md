@@ -45,6 +45,7 @@ production:
 --mode <mode>
 --name <name>
 --mail-sender <email>
+--smtp-user <user>
 
 --objects <list>
   (cron_runner.sh only)
@@ -71,3 +72,4 @@ Logs are stored under:
 ## Notes
 - Missing values are complemented from common.conf
 - dry-run performs real SMTP communication
+- --mail-smtp-user is removed; use --smtp-user

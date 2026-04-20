@@ -67,7 +67,7 @@ send_mail_ensure_auth_plain() {
 
     smtp_user_address="$(send_mail_auth_user_plain)"
     if [ -z "${smtp_user_address}" ]; then
-        echo "ERROR: SMTP auth user is empty. Set --mail-sender." >&2
+        echo "ERROR: SMTP auth user is empty. Set --smtp-user." >&2
         return 1
     fi
     export smtp_user_address
